@@ -1,8 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
-import { createServer as createViteServer } from 'vite';
 
 dotenv.config();
 
@@ -12,7 +11,7 @@ const PORT = 3000;
 app.use(express.json());
 
 // Health check endpoint
-app.get('/api/health', (_req: Request, res: Response) => {
+app.all(['/api/health', '/health', '/.netlify/functions/api/health'], (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -344,7 +343,7 @@ function generateFallbackLeads(niche: string, city: string, state: string, count
 // ----------------------------------------------------
 // API Route 1: Lead Search (Geoapify + Fallback)
 // ----------------------------------------------------
-app.all('/api/leads/search', async (req: Request, res: Response) => {
+app.all(['/api/leads/search', '/leads/search', '/.netlify/functions/api/leads/search'], async (req: Request, res: Response) => {
   try {
     const niche = req.body?.niche || (req.query?.niche as string) || 'Dentist';
     const city = req.body?.city || (req.query?.city as string) || 'Austin';
@@ -441,7 +440,7 @@ app.all('/api/leads/search', async (req: Request, res: Response) => {
 // ----------------------------------------------------
 // API Route 2: Contact Email Extraction
 // ----------------------------------------------------
-app.all('/api/leads/extract-email', async (req: Request, res: Response) => {
+app.all(['/api/leads/extract-email', '/leads/extract-email', '/.netlify/functions/api/leads/extract-email'], async (req: Request, res: Response) => {
   try {
     const website = req.body?.website || (req.query?.website as string);
     if (!website) {
@@ -744,7 +743,7 @@ function generateTailoredAudit(name: string, niche: string, city: string, websit
 // ----------------------------------------------------
 // API Route 3: Gemini Vision Website Audit & Cold Email Draft
 // ----------------------------------------------------
-app.all('/api/leads/audit-and-draft', async (req: Request, res: Response) => {
+app.all(['/api/leads/audit-and-draft', '/leads/audit-and-draft', '/.netlify/functions/api/leads/audit-and-draft'], async (req: Request, res: Response) => {
   const name = req.body?.name || (req.query?.name as string) || 'Business';
   const niche = req.body?.niche || (req.query?.niche as string) || 'Services';
   const website = req.body?.website || (req.query?.website as string) || 'https://google.com';
@@ -869,11 +868,20 @@ Return strictly JSON conforming to the schema.`;
 // Express & Vite Server Setup
 // ----------------------------------------------------
 async function startAppServer() {
-  if (process.env.NETLIFY || process.env.NETLIFY_DEV) {
+  const isServerless = Boolean(
+    process.env.NETLIFY ||
+    process.env.NETLIFY_DEV ||
+    process.env.LAMBDA_TASK_ROOT ||
+    process.env.AWS_EXECUTION_ENV ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME
+  );
+
+  if (isServerless) {
     return;
   }
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -882,7 +890,7 @@ async function startAppServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
@@ -892,6 +900,16 @@ async function startAppServer() {
   });
 }
 
-startAppServer();
+const isServerlessEnvironment = Boolean(
+  process.env.NETLIFY ||
+  process.env.NETLIFY_DEV ||
+  process.env.LAMBDA_TASK_ROOT ||
+  process.env.AWS_EXECUTION_ENV ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME
+);
+
+if (!isServerlessEnvironment) {
+  startAppServer();
+}
 
 export default app;
