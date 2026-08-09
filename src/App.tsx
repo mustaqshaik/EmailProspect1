@@ -45,6 +45,10 @@ export default function App() {
         body: JSON.stringify({ niche, city, state, limit }),
       });
 
+      if (!searchRes.ok) {
+        throw new Error(`Search endpoint returned status ${searchRes.status}`);
+      }
+
       const searchData = await searchRes.json();
       const rawLeads: Lead[] = searchData.leads || [];
 
@@ -82,11 +86,15 @@ export default function App() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ website: lead.website }),
           });
-          const emailData = await emailRes.json();
-          lead.foundEmail = emailData.foundEmail || '';
-          lead.candidateEmails = emailData.candidateEmails || [];
-          lead.emailStatus = emailData.foundEmail ? 'found' : 'not_found';
-          lead.manualEmail = emailData.foundEmail || '';
+          if (emailRes.ok) {
+            const emailData = await emailRes.json();
+            lead.foundEmail = emailData.foundEmail || '';
+            lead.candidateEmails = emailData.candidateEmails || [];
+            lead.emailStatus = emailData.foundEmail ? 'found' : 'not_found';
+            lead.manualEmail = emailData.foundEmail || '';
+          } else {
+            lead.emailStatus = 'not_found';
+          }
         } catch (e) {
           lead.emailStatus = 'not_found';
         }
@@ -129,17 +137,22 @@ export default function App() {
             }),
           });
 
-          const auditData = await auditRes.json();
-          lead.auditScore = auditData.auditScore;
-          lead.auditSummary = auditData.auditSummary;
-          lead.strengths = auditData.strengths;
-          lead.conversionGaps = auditData.conversionGaps;
-          lead.uxFlaws = auditData.uxFlaws;
-          lead.auditStatus = 'completed';
+          if (auditRes.ok) {
+            const auditData = await auditRes.json();
+            lead.auditScore = auditData.auditScore;
+            lead.auditSummary = auditData.auditSummary;
+            lead.strengths = auditData.strengths;
+            lead.conversionGaps = auditData.conversionGaps;
+            lead.uxFlaws = auditData.uxFlaws;
+            lead.auditStatus = 'completed';
 
-          lead.emailSubject = auditData.subject;
-          lead.emailBody = auditData.emailBody;
-          lead.emailDraftStatus = 'completed';
+            lead.emailSubject = auditData.subject;
+            lead.emailBody = auditData.emailBody;
+            lead.emailDraftStatus = 'completed';
+          } else {
+            lead.auditStatus = 'failed';
+            lead.emailDraftStatus = 'failed';
+          }
         } catch (e) {
           lead.auditStatus = 'failed';
           lead.emailDraftStatus = 'failed';

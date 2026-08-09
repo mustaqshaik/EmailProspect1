@@ -12,6 +12,11 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Health check endpoint
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Initialize Gemini Client
 const getGeminiClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -340,13 +345,12 @@ function generateFallbackLeads(niche: string, city: string, state: string, count
 // ----------------------------------------------------
 // API Route 1: Lead Search (Geoapify + Fallback)
 // ----------------------------------------------------
-app.post('/api/leads/search', async (req: Request, res: Response) => {
+app.all('/api/leads/search', async (req: Request, res: Response) => {
   try {
-    const { niche, city, state, limit = 10 } = req.body;
-
-    if (!niche || !city || !state) {
-      return res.status(400).json({ error: 'Niche, City, and State are required.' });
-    }
+    const niche = req.body?.niche || (req.query?.niche as string) || 'Dentist';
+    const city = req.body?.city || (req.query?.city as string) || 'Austin';
+    const state = req.body?.state || (req.query?.state as string) || 'TX';
+    const limit = Number(req.body?.limit || req.query?.limit) || 10;
 
     const apiKey = process.env.GEOAPIFY_API_KEY;
     const category = CATEGORY_MAP[niche] || 'office.company';
@@ -438,9 +442,9 @@ app.post('/api/leads/search', async (req: Request, res: Response) => {
 // ----------------------------------------------------
 // API Route 2: Contact Email Extraction
 // ----------------------------------------------------
-app.post('/api/leads/extract-email', async (req: Request, res: Response) => {
+app.all('/api/leads/extract-email', async (req: Request, res: Response) => {
   try {
-    const { website } = req.body;
+    const website = req.body?.website || (req.query?.website as string);
     if (!website) {
       return res.status(400).json({ error: 'Website URL is required' });
     }
@@ -741,8 +745,13 @@ function generateTailoredAudit(name: string, niche: string, city: string, websit
 // ----------------------------------------------------
 // API Route 3: Gemini Vision Website Audit & Cold Email Draft
 // ----------------------------------------------------
-app.post('/api/leads/audit-and-draft', async (req: Request, res: Response) => {
-  const { name = 'Business', niche = 'Services', website = 'https://google.com', city = 'your city', state = 'US', screenshotUrl } = req.body || {};
+app.all('/api/leads/audit-and-draft', async (req: Request, res: Response) => {
+  const name = req.body?.name || (req.query?.name as string) || 'Business';
+  const niche = req.body?.niche || (req.query?.niche as string) || 'Services';
+  const website = req.body?.website || (req.query?.website as string) || 'https://google.com';
+  const city = req.body?.city || (req.query?.city as string) || 'your city';
+  const state = req.body?.state || (req.query?.state as string) || 'US';
+  const screenshotUrl = req.body?.screenshotUrl || (req.query?.screenshotUrl as string);
 
   if (!name || !website) {
     return res.status(400).json({ error: 'Business name and website are required' });
