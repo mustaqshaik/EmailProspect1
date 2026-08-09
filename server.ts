@@ -3,7 +3,6 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
-import serverless from 'serverless-http';
 
 dotenv.config();
 
@@ -888,16 +887,11 @@ async function startAppServer() {
     });
   }
 
-  // Conditional listen for standalone server execution vs serverless
-  if (!process.env.LAMBDA_TASK_ROOT && !process.env.AWS_EXECUTION_ENV) {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`ProspectPilot server running on http://localhost:${PORT}`);
-    });
-  }
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`ProspectPilot server running on http://localhost:${PORT}`);
+  });
 }
 
 startAppServer();
 
-// Export handler for serverless environments
-export const handler = serverless(app);
 export default app;
