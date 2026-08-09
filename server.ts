@@ -870,6 +870,10 @@ Return strictly JSON conforming to the schema.`;
 // Express & Vite Server Setup
 // ----------------------------------------------------
 async function startAppServer() {
+  if (process.env.NETLIFY || process.env.NETLIFY_DEV) {
+    return;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
