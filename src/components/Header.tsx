@@ -84,7 +84,7 @@ export const Header: React.FC = () => {
                   <span>1. Local Lead Scraping (Geoapify)</span>
                 </h4>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  Queries Geoapify Geocoding to resolve your target US City & State into a precise geographical Place ID. Fetches active local businesses filtered by niche categories and enforces valid HTTP website domains.
+                  Queries Geoapify Geocoding to resolve your target Indian City & State / UT into a precise geographical Place ID. Fetches active local businesses filtered by niche categories and enforces valid HTTP website domains.
                 </p>
               </div>
 

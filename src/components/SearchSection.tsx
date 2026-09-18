@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Briefcase, Sliders, Sparkles, Building2, Lock } from 'lucide-react';
 import { NICHES } from '../data/niches';
-import { US_CITIES } from '../data/usCities';
+import { INDIAN_CITIES } from '../data/indianCities';
 
 interface SearchSectionProps {
   onSearch: (niche: string, city: string, state: string, limit: number) => void;
@@ -10,14 +10,14 @@ interface SearchSectionProps {
 
 export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoading }) => {
   const [selectedNiche, setSelectedNiche] = useState<string>(NICHES[0].id);
-  const [selectedCity, setSelectedCity] = useState<string>(US_CITIES[0].city);
-  const [stateValue, setStateValue] = useState<string>(US_CITIES[0].state);
+  const [selectedCity, setSelectedCity] = useState<string>(INDIAN_CITIES[0].city);
+  const [stateValue, setStateValue] = useState<string>(INDIAN_CITIES[0].state);
   const [maxLeads, setMaxLeads] = useState<number>(5);
   const [citySearchTerm, setCitySearchTerm] = useState<string>('');
 
   // Automatically update State when City changes and lock it
   useEffect(() => {
-    const matched = US_CITIES.find(
+    const matched = INDIAN_CITIES.find(
       (c) => c.city.toLowerCase() === selectedCity.toLowerCase()
     );
     if (matched) {
@@ -31,8 +31,8 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoadin
     onSearch(selectedNiche, selectedCity, stateValue, maxLeads);
   };
 
-  const filteredCities = US_CITIES.filter((c) =>
-    `${c.city}, ${c.state}`.toLowerCase().includes(citySearchTerm.toLowerCase())
+  const filteredCities = INDIAN_CITIES.filter((c) =>
+    `${c.city}, ${c.state}, ${c.stateName || ''}`.toLowerCase().includes(citySearchTerm.toLowerCase())
   );
 
   return (
@@ -44,7 +44,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoadin
             <span>Find &amp; Pilot Local Leads</span>
           </h2>
           <p className="text-xs text-slate-400">
-            Select an industry niche and US target city to initiate scraping, AI website auditing, and outreach generation.
+            Select an industry niche and Indian target city to initiate scraping, AI website auditing, and outreach generation.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoadin
           <div className="md:col-span-4">
             <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center space-x-1.5">
               <Building2 className="w-3.5 h-3.5 text-cyan-400" />
-              <span>US City (100+ Major Markets)</span>
+              <span>Indian City (80+ Major Markets &amp; Capitals)</span>
             </label>
             <div className="relative">
               <select
@@ -96,7 +96,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoadin
                 disabled={isLoading}
                 className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition appearance-none cursor-pointer disabled:opacity-50"
               >
-                {US_CITIES.map((c) => (
+                {INDIAN_CITIES.map((c) => (
                   <option key={`${c.city}-${c.state}`} value={c.city}>
                     {c.city}, {c.state} ({c.stateName})
                   </option>
@@ -114,7 +114,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ onSearch, isLoadin
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center space-x-1.5">
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              <span>State (Locked)</span>
+              <span>State / UT (Auto-Set)</span>
             </label>
             <div className="relative">
               <input
