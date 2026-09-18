@@ -355,7 +355,7 @@ export default function App() {
             </div>
             <h3 className="text-xl font-bold text-white">Ready to Scrape &amp; Audit Local Prospects</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-              Select a target industry niche and major US city above. ProspectPilot will locate active business websites, extract decision-maker emails, capture live site screenshots, and run Gemini Vision audits to generate conversion-driven cold emails.
+              Select a target industry niche and major Indian city above. IndianProspectPilot will locate active business websites, extract decision-maker emails, capture live site screenshots, and run Gemini Vision audits to generate conversion-driven cold emails.
             </p>
             <div className="pt-2 flex justify-center gap-3 text-xs text-slate-500 font-mono">
               <span>• Geoapify API</span>

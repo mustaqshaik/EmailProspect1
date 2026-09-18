@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-xl font-bold tracking-tight text-white font-sans">
-                  ProspectPilot
+                  Indian Prospect Pilot
                 </h1>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   v2.0 Engine
